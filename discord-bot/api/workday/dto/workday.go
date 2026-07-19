@@ -7,7 +7,7 @@ type AppliedFacet struct {
 	LocationCountry []string `json:"locationCountry,omitempty"`
 }
 
-type JobPosting struct {
+type WorkdayJobPosting struct {
 	Title         string   `json:"title"`
 	ExternalPath  string   `json:"externalPath"`
 	LocationsText string   `json:"locationsText"`
@@ -15,11 +15,11 @@ type JobPosting struct {
 	BulletFields  []string `json:"bulletFields"`
 }
 
-type JobPostingRequest struct {
+type WorkdayJobPostingRequest struct {
 	AppliedFacets AppliedFacet `json:"appliedFacets"`
 }
 
-type JobPostingResponse struct {
+type WorkdayJobPostingResponse struct {
 	Total       uint64 `json:"total"`
-	JobPostings []JobPosting
+	JobPostings []WorkdayJobPosting
 }

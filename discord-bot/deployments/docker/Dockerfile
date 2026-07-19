@@ -12,7 +12,7 @@ COPY . .
 
 RUN chown -R appuser:appuser /app
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o pcep-disgo ./cmd/app/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o pcep-disgo ./cmd/app/*.go
 
 USER appuser
 

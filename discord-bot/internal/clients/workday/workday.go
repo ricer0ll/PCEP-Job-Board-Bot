@@ -1,11 +1,8 @@
 package workday
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"path/filepath"
 
 	"github.com/disgoorg/disgo/bot"
@@ -13,21 +10,34 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
+	"resty.dev/v3"
 )
 
-var jobsCache map[string][]dto.JobPosting = make(map[string][]dto.JobPosting)
-var companyJsonPath = filepath.Join("internal", "clients", "workday", "companies.json")
+var (
+	jobsCache       map[string][]dto.WorkdayJobPosting = make(map[string][]dto.WorkdayJobPosting)
+	companyJsonPath string                             = filepath.Join("internal", "clients", "workday", "companies.json")
+)
 
-func InitJobsCache() {
+type WorkdayClient struct {
+	restyClient *resty.Client
+}
+
+func NewWorkdayClient(restyClient *resty.Client) *WorkdayClient {
+	return &WorkdayClient{
+		restyClient: restyClient,
+	}
+}
+
+func (w WorkdayClient) InitJobsCache() {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
-		panic("Unable to load companies")
+		panic(err)
 	}
 
-	slog.Info(fmt.Sprintf("Loaded %d companies from config", len(companies)))
+	slog.Info(fmt.Sprintf("Loaded %d companies from Workday config", len(companies)))
 
 	for _, company := range companies {
-		jobs, err := getWorkdayJobPostings(
+		jobs, err := w.getWorkdayJobPostings(
 			company.WorkdayRequestURL,
 			company.JobFamily,
 			company.JobFamilyGroup,
@@ -43,7 +53,7 @@ func InitJobsCache() {
 	}
 }
 
-func GetNewJobPostings(client *bot.Client) {
+func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
 		panic("Unable to load companies")
@@ -51,7 +61,7 @@ func GetNewJobPostings(client *bot.Client) {
 
 	for _, company := range companies {
 		// get workday job postings
-		liveJobs, err := getWorkdayJobPostings(
+		liveJobs, err := w.getWorkdayJobPostings(
 			company.WorkdayRequestURL,
 			company.JobFamily,
 			company.JobFamilyGroup,
@@ -72,7 +82,7 @@ func GetNewJobPostings(client *bot.Client) {
 		for _, job := range liveJobs {
 			_, ok := cachedIDs[job.BulletFields[0]]
 			if !ok {
-				notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
+				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
 			}
 		}
 
@@ -80,25 +90,16 @@ func GetNewJobPostings(client *bot.Client) {
 	}
 }
 
-func notifyNewJob(client *bot.Client, jobPosting *dto.JobPosting, company string, workdayURL string) {
-	embed := generateNewJobPostingEmbed(jobPosting, company, workdayURL)
-	client.Rest.CreateMessage(
-		snowflake.MustParse(utils.GetDiscordChannelID()),
-		discord.NewMessageCreate().WithEmbeds(embed),
-	)
-
-}
-
-func getWorkdayJobPostings(
+func (w WorkdayClient) getWorkdayJobPostings(
 	url string,
 	jobFamily []string,
 	jobFamilyGroup []string,
 	locationCountry []string,
 	locations []string,
-) ([]dto.JobPosting, error) {
-	jobPostings := []dto.JobPosting{}
+) ([]dto.WorkdayJobPosting, error) {
+	jobPostings := []dto.WorkdayJobPosting{}
 
-	request := dto.JobPostingRequest{
+	request := dto.WorkdayJobPostingRequest{
 		AppliedFacets: dto.AppliedFacet{
 			JobFamily:       jobFamily,
 			JobFamilyGroup:  jobFamilyGroup,
@@ -107,45 +108,37 @@ func getWorkdayJobPostings(
 		},
 	}
 
-	jsonData, err := json.Marshal(request)
+	resp := dto.WorkdayJobPostingResponse{}
+
+	result, err := w.restyClient.R().
+		SetContentType("application/json").
+		SetBody(request).
+		SetResult(&resp).
+		Post(url)
+
 	if err != nil {
-		return jobPostings, err
+		slog.Error("Failed to post request to workday")
+		return nil, err
 	}
-
-	resp, err := http.Post(
-		url,
-		"application/json",
-		bytes.NewBuffer(jsonData),
-	)
-	if err != nil {
-		return jobPostings, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return jobPostings, err
-	}
-	defer resp.Body.Close()
-
-	responseObj, err := mapJobPostingResponse(resp)
-	if err != nil {
-		return jobPostings, err
-	}
-
-	jobPostings = responseObj.JobPostings
-	return jobPostings, nil
-}
-
-func mapJobPostingResponse(resp *http.Response) (*dto.JobPostingResponse, error) {
-	var responseObj dto.JobPostingResponse
-
-	err := json.NewDecoder(resp.Body).Decode(&responseObj)
-	if err != nil {
+	if result.IsStatusFailure() {
+		slog.Error("Post request to workday status code not 200's")
 		return nil, err
 	}
 
-	return &responseObj, nil
+	jobPostings = resp.JobPostings
+	return jobPostings, nil
 }
 
-func generateNewJobPostingEmbed(jobPosting *dto.JobPosting, company string, workdayURL string) discord.Embed {
+func (w WorkdayClient) notifyNewJob(client *bot.Client, jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) {
+	embed := w.generateNewJobPostingEmbed(jobPosting, company, workdayURL)
+	client.Rest.CreateMessage(
+		snowflake.MustParse(utils.GetDiscordChannelID()),
+		discord.NewMessageCreate().WithEmbeds(embed),
+	)
+
+}
+
+func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) discord.Embed {
 	var title string = fmt.Sprintf("New Job Posting from %s!", company)
 	var description string = fmt.Sprintf("Position: **%s**\nLocation: %s", jobPosting.Title, jobPosting.LocationsText)
 	var url string = workdayURL + fmt.Sprintf("%s", jobPosting.ExternalPath)

@@ -12,7 +12,6 @@ import (
 	"github.com/disgoorg/disgo/cache"
 	commands "github.com/ricer0ll/pcep-job-board/discord-bot/internal/bot/command"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/bot/event"
-	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/scheduler"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
 )
 
@@ -48,7 +47,7 @@ func main() {
 	}
 
 	// Start cron job to check jobs
-	scheduler.InitCronJob(client)
+	schedulerClient.InitCronJob(client)
 
 	s := make(chan os.Signal, 1)
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)

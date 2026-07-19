@@ -1,0 +1,27 @@
+services:
+  disgo:
+    build:
+      context: ./discord-bot
+      dockerfile: deployments/docker/Dockerfile
+    restart: always
+    volumes:
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+    environment:
+      - TZ=America/Los_Angeles
+    networks:
+      - pcep
+  webscraper:
+    build:
+      context: ./webscraper
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - TZ=America/Los_Angeles
+    networks:
+      - pcep
+    ports:
+      - 8100:8000
+  
+networks:
+  pcep:
+    driver: bridge
