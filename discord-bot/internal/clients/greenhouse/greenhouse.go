@@ -34,7 +34,7 @@ func NewGreenhouseClient(restyClient *resty.Client) *GreenhouseClient {
 func (g GreenhouseClient) InitJobsCache() {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
-		panic("Unable to load companies")
+		panic(err)
 	}
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Greenhouse config", len(companies)))

@@ -31,7 +31,7 @@ func NewWorkdayClient(restyClient *resty.Client) *WorkdayClient {
 func (w WorkdayClient) InitJobsCache() {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
-		panic("Unable to load companies")
+		panic(err)
 	}
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Workday config", len(companies)))
