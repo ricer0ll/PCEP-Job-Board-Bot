@@ -94,7 +94,7 @@ func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*dto.GreenhouseJ
 		SetContentType("application/json").
 		SetBody(request).
 		SetResult(&resp).
-		SetTimeout(10 * time.Second).
+		SetTimeout(1 * time.Minute).
 		Post(webscraperServiceUrl)
 
 	if err != nil {
