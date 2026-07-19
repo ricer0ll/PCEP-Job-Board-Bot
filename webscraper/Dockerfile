@@ -1,4 +1,4 @@
-FROM microsoft/playwright-python
+FROM mcr.microsoft.com/playwright/python:v1.61.0
 
 # Install UV
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
