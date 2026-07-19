@@ -1,37 +1,63 @@
 package scheduler
 
 import (
-	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/greenhouse"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/workday"
 )
 
-func InitCronJob(client *bot.Client) gocron.Scheduler {
+type SchedulerClient struct {
+	workdayClient    *workday.WorkdayClient
+	greenhouseClient *greenhouse.GreenhouseClient
+}
+
+func NewSchedulerClient(
+	workdayClient *workday.WorkdayClient,
+	greenhouseClient *greenhouse.GreenhouseClient,
+) *SchedulerClient {
+	return &SchedulerClient{
+		workdayClient:    workdayClient,
+		greenhouseClient: greenhouseClient,
+	}
+}
+
+func (s SchedulerClient) InitCronJob(client *bot.Client) gocron.Scheduler {
 	location, _ := time.LoadLocation("America/Los_Angeles")
 	scheduler, err := gocron.NewScheduler(gocron.WithLocation(location))
 	if err != nil {
 		panic("Failed to start cron scheduler!")
 	}
 
-	workday.InitJobsCache()
+	s.workdayClient.InitJobsCache()
+	s.greenhouseClient.InitJobsCache()
 
-	j, err := scheduler.NewJob(
+	_, err = scheduler.NewJob(
 		gocron.CronJob(
 			"0 6-12 * * 1-5",
 			false,
 		),
-		gocron.NewTask(workday.GetNewJobPostings, client),
+		gocron.NewTask(s.workdayClient.GetNewJobPostings, client),
 	)
+	if err != nil {
+		panic("Failed to create job for scheduler")
+	}
 
+	_, err = scheduler.NewJob(
+		gocron.CronJob(
+			"0 6-12 * * 1-5",
+			false,
+		),
+		gocron.NewTask(s.greenhouseClient.GetNewJobPostings, client),
+	)
 	if err != nil {
 		panic("Failed to create job for scheduler")
 	}
 
 	scheduler.Start()
-	slog.Info(fmt.Sprintf("Started cron job with id %s", j.ID()))
+	slog.Info("Started cron jobs")
 	return scheduler
 }

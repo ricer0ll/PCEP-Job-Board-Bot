@@ -8,6 +8,8 @@ services:
       - ~/.config/gcloud:/root/.config/gcloud:ro
     environment:
       - TZ=America/Los_Angeles
+    networks:
+      - pcep
   webscraper:
     build:
       context: ./webscraper
@@ -15,3 +17,11 @@ services:
     restart: always
     environment:
       - TZ=America/Los_Angeles
+    networks:
+      - pcep
+    ports:
+      - 8100:8000
+  
+networks:
+  pcep:
+    driver: bridge
