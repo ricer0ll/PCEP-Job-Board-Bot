@@ -67,7 +67,7 @@ func (s SchedulerClient) InitCronJob(client *bot.Client) gocron.Scheduler {
 
 	for _, c := range nonWorkdayClients {
 		_, err = scheduler.NewJob(
-			gocron.CronJob("* * * * 0", false),
+			gocron.CronJob("0 0 * * 0", false),
 			gocron.NewTask(c.InitJobsCache),
 		)
 	}
