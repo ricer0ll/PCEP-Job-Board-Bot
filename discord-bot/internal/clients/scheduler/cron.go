@@ -59,6 +59,19 @@ func (s SchedulerClient) InitCronJob(client *bot.Client) gocron.Scheduler {
 		}
 	}
 
+	// Need to reset non workday clients as they dont use ids
+	nonWorkdayClients := []jobClient{
+		s.greenhouseClient,
+		s.ripplerClient,
+	}
+
+	for _, c := range nonWorkdayClients {
+		_, err = scheduler.NewJob(
+			gocron.CronJob("* * * * 0", false),
+			gocron.NewTask(c.InitJobsCache),
+		)
+	}
+
 	scheduler.Start()
 	slog.Info("Started cron jobs")
 	return scheduler
