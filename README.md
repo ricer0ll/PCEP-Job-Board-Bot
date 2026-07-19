@@ -5,6 +5,7 @@ Just a discord bot for the PCEP server that notifies if a new job is found for t
 [Apex Fintech Solutions](https://peak6group.wd1.myworkdayjobs.com/apexfintechsolutions)  
 [Trimble](https://trimble.wd1.myworkdayjobs.com/en-US/TrimbleCareers/jobs)  
 [Jama Software](https://www.jamasoftware.com/company/careers/#careers)  
+[LegitScript](https://www.legitscript.com/about/careers/)
 
 The bot uses the company's Workday API to fetch job listings, with a scheduled cron job running hourly on weekdays from 6 AM to 12 PM to look for any newly posted jobs. It also webscrapes for companies that don't use workday APIs (like Greenhouse for example).  
 
