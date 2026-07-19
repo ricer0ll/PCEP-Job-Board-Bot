@@ -15,11 +15,6 @@ type WorkdayJobPosting struct {
 	BulletFields  []string `json:"bulletFields"`
 }
 
-type GreenhouseJobPosting struct {
-	JobTitle string `json:"job_title"`
-	Location string `json:"location"`
-}
-
 type WorkdayJobPostingRequest struct {
 	AppliedFacets AppliedFacet `json:"appliedFacets"`
 }
@@ -27,12 +22,4 @@ type WorkdayJobPostingRequest struct {
 type WorkdayJobPostingResponse struct {
 	Total       uint64 `json:"total"`
 	JobPostings []WorkdayJobPosting
-}
-
-type GreenhouseJobPostingRequest struct {
-	URL string `json:"url"`
-}
-
-type GreenhouseJobPostingResponse struct {
-	Jobs []GreenhouseJobPosting `json:"jobs"`
 }
