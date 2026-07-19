@@ -37,7 +37,7 @@ func (r RipplerClient) InitJobsCache() {
 		panic(err)
 	}
 
-	slog.Info(fmt.Sprintf("Loaded %d companies from Greenhouse config", len(companies)))
+	slog.Info(fmt.Sprintf("Loaded %d companies from Rippler config", len(companies)))
 
 	for _, company := range companies {
 		companyName := company.Name
