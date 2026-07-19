@@ -4,12 +4,14 @@ services:
       context: ./discord-bot
       dockerfile: deployments/docker/Dockerfile
     restart: always
-    volumes:
-      - ~/.config/gcloud:/root/.config/gcloud:ro
     environment:
       - TZ=America/Los_Angeles
     networks:
       - pcep
+    depends_on:
+      webscraper:
+        condition: service_healthy
+
   webscraper:
     build:
       context: ./webscraper
@@ -21,6 +23,12 @@ services:
       - pcep
     ports:
       - 8100:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
   
 networks:
   pcep:

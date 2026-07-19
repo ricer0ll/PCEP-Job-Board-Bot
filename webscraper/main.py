@@ -1,10 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from playwright.async_api import async_playwright
 from models.greenhouse import GreenhouseJob, GreenhouseJobsResponse, GreenhouseJobsRequest
 
 app = FastAPI()
 
 keywords = ["developer", "engineer", "software", "architect", "cloud"]
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    return {"status": "healthy"}
 
 @app.post("/greenhouse/jobs")
 async def get_jama_jobs(request: GreenhouseJobsRequest) -> GreenhouseJobsResponse:
