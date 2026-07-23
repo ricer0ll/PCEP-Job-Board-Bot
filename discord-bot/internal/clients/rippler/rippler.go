@@ -81,7 +81,10 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 				r.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
 			}
 		}
+
+		jobsCache[company.Name] = liveJobsPosting
 	}
+
 }
 
 func (r RipplerClient) getRipplerJobPostings(url string) (*dto.RipplerJobPostingResponse, error) {

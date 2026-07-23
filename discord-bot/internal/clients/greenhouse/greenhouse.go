@@ -81,6 +81,8 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 				g.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
 			}
 		}
+
+		jobsCache[company.Name] = liveJobsPosting
 	}
 }
 
