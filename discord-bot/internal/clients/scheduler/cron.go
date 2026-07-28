@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -11,10 +12,14 @@ import (
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/workday"
 )
 
+type jobClient interface {
+	InitJobsCache()
+	GetNewJobPostings(client *bot.Client)
+}
+
 type SchedulerClient struct {
-	workdayClient    *workday.WorkdayClient
-	greenhouseClient *greenhouse.GreenhouseClient
-	ripplerClient    *rippler.RipplerClient
+	targetClients     []jobClient
+	nonWorkdayClients []jobClient
 }
 
 func NewSchedulerClient(
@@ -23,31 +28,32 @@ func NewSchedulerClient(
 	ripplerClient *rippler.RipplerClient,
 ) *SchedulerClient {
 	return &SchedulerClient{
-		workdayClient:    workdayClient,
-		greenhouseClient: greenhouseClient,
-		ripplerClient:    ripplerClient,
+		targetClients: []jobClient{
+			workdayClient,
+			greenhouseClient,
+			ripplerClient,
+		},
+		nonWorkdayClients: []jobClient{
+			greenhouseClient,
+			ripplerClient,
+		},
 	}
 }
 
-func (s SchedulerClient) InitCronJob(client *bot.Client) gocron.Scheduler {
-	location, _ := time.LoadLocation("America/Los_Angeles")
+func (s *SchedulerClient) InitCronJob(client *bot.Client) (gocron.Scheduler, error) {
+	location, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		slog.Warn("Failed to load America/Los_Angeles timezone, falling back to UTC", "error", err)
+		location = time.UTC
+	}
+
 	scheduler, err := gocron.NewScheduler(gocron.WithLocation(location))
 	if err != nil {
-		panic("Failed to start cron scheduler!")
+		return nil, fmt.Errorf("failed to create cron scheduler: %w", err)
 	}
 
-	type jobClient interface {
-		InitJobsCache()
-		GetNewJobPostings(client *bot.Client)
-	}
-
-	targetClients := []jobClient{
-		s.workdayClient,
-		s.greenhouseClient,
-		s.ripplerClient,
-	}
-
-	for _, c := range targetClients {
+	for _, clientObj := range s.targetClients {
+		c := clientObj
 		c.InitJobsCache()
 
 		_, err = scheduler.NewJob(
@@ -55,24 +61,23 @@ func (s SchedulerClient) InitCronJob(client *bot.Client) gocron.Scheduler {
 			gocron.NewTask(c.GetNewJobPostings, client),
 		)
 		if err != nil {
-			panic("Failed to create job for scheduler")
+			return nil, fmt.Errorf("failed to schedule posting job: %w", err)
 		}
 	}
 
 	// Need to reset non workday clients as they dont use ids
-	nonWorkdayClients := []jobClient{
-		s.greenhouseClient,
-		s.ripplerClient,
-	}
-
-	for _, c := range nonWorkdayClients {
+	for _, clientObj := range s.nonWorkdayClients {
+		c := clientObj
 		_, err = scheduler.NewJob(
 			gocron.CronJob("0 0 * * 0", false),
 			gocron.NewTask(c.InitJobsCache),
 		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to schedule cache reset job: %w", err)
+		}
 	}
 
 	scheduler.Start()
-	slog.Info("Started cron jobs")
-	return scheduler
+	slog.Info("Started cron jobs successfully")
+	return scheduler, nil
 }
