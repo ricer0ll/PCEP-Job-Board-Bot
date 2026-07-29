@@ -79,10 +79,9 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 			_, ok := cachedIDs[job.JobTitle]
 			if !ok {
 				r.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
+				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
-
-		jobsCache[company.Name] = liveJobsPosting
 	}
 
 }

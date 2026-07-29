@@ -79,10 +79,9 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 			_, ok := cachedIDs[job.JobTitle]
 			if !ok {
 				g.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
+				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
-
-		jobsCache[company.Name] = liveJobsPosting
 	}
 }
 
