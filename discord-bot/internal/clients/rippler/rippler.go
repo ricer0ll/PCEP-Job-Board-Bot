@@ -39,7 +39,7 @@ func (r RipplerClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Rippler config", len(companies)))
 
-	jobsCache := make(map[string][]dto.WorkdayJobPosting)
+	jobsCache := make(map[string][]dto.RipplerJobPosting)
 
 	for _, company := range companies {
 		companyName := company.Name
@@ -51,7 +51,7 @@ func (r RipplerClient) InitJobsCache() {
 			continue
 		}
 
-		jobsCache[companyName] = make(map[string][]dto.RipplerJobPosting)
+		jobsCache[companyName] = append(jobsCache[companyName], jobPostings.Jobs...)
 	}
 }
 
