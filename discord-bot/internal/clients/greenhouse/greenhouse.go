@@ -39,6 +39,8 @@ func (g GreenhouseClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Greenhouse config", len(companies)))
 
+	jobsCache := make(map[string][]dto.GreenhouseJobPosting)
+
 	for _, company := range companies {
 		companyName := company.Name
 		url := company.URL

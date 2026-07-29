@@ -36,6 +36,8 @@ func (w WorkdayClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Workday config", len(companies)))
 
+	make(map[string][]dto.WorkdayJobPosting)
+
 	for _, company := range companies {
 		jobs, err := w.getWorkdayJobPostings(
 			company.WorkdayRequestURL,
