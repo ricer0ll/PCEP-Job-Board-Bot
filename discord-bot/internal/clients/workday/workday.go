@@ -123,7 +123,7 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	}
 	if result.IsStatusFailure() {
 		slog.Error("Post request to workday status code not 200's")
-		return nil, err
+		return nil, fmt.Errorf("workday request failed with status code: %d", result.StatusCode())
 	}
 
 	jobPostings = resp.JobPostings

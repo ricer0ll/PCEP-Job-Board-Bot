@@ -107,7 +107,7 @@ func (r RipplerClient) getRipplerJobPostings(url string) (*dto.RipplerJobPosting
 	}
 	if result.IsStatusFailure() {
 		slog.Error("Post request to workday status code not 200's")
-		return nil, err
+		return nil, fmt.Errorf("webscraper request failed with status code: %d", result.StatusCode())
 	}
 
 	return &resp, nil
