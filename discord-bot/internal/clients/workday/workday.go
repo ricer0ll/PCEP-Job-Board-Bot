@@ -85,10 +85,9 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 			_, ok := cachedIDs[job.BulletFields[0]]
 			if !ok {
 				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
+				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
-
-		jobsCache[company.Name] = liveJobs
 	}
 }
 
