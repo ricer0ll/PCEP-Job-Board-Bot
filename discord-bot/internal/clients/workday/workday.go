@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -83,7 +85,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 
 		for _, job := range liveJobs {
 			_, ok := cachedIDs[job.BulletFields[0]]
-			if !ok {
+			if !ok && w.hasRelevantRole(job.Title) {
 				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
 				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
@@ -150,4 +152,13 @@ func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *dto.WorkdayJobPost
 		WithURL(url)
 
 	return embed
+}
+
+func (w WorkdayClient) hasRelevantRole(role string) bool {
+	relevantRoles := []string{"developer", "engineer", "software", "architect", "cloud"}
+
+	if slices.Contains(relevantRoles, strings.ToLower(role)) {
+		return true
+	}
+	return false
 }
