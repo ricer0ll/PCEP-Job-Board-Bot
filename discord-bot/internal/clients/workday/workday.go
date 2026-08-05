@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/disgoorg/disgo/bot"
@@ -18,6 +17,7 @@ import (
 var (
 	jobsCache       map[string][]dto.WorkdayJobPosting = make(map[string][]dto.WorkdayJobPosting)
 	companyJsonPath string                             = filepath.Join("internal", "clients", "workday", "companies.json")
+	relevantRoles   []string                           = []string{"developer", "engineer", "software", "architect", "cloud"}
 )
 
 type WorkdayClient struct {
@@ -85,7 +85,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 
 		for _, job := range liveJobs {
 			_, ok := cachedIDs[job.BulletFields[0]]
-			if !ok && w.hasRelevantRole(job.Title) {
+			if !ok && w.isRelevantRole(job.Title) {
 				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
 				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
@@ -154,11 +154,13 @@ func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *dto.WorkdayJobPost
 	return embed
 }
 
-func (w WorkdayClient) hasRelevantRole(role string) bool {
-	relevantRoles := []string{"developer", "engineer", "software", "architect", "cloud"}
+func (w WorkdayClient) isRelevantRole(role string) bool {
+	lowerCasedRole := strings.ToLower(role)
 
-	if slices.Contains(relevantRoles, strings.ToLower(role)) {
-		return true
+	for _, relevantRole := range relevantRoles {
+		if strings.Contains(lowerCasedRole, relevantRole) {
+			return true
+		}
 	}
 	return false
 }
