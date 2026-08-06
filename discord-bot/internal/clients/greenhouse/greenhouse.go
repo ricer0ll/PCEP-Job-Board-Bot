@@ -8,6 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
@@ -20,6 +21,10 @@ var (
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
+
+type DiscordRestClient interface {
+	CreateMessage(channelID snowflake.ID, messageCreate discord.MessageCreate, opts ...rest.RequestOpt) (*discord.Message, error)
+}
 
 type GreenhouseClient struct {
 	restyClient *resty.Client
@@ -80,7 +85,7 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 		for _, job := range liveJobsPosting {
 			_, ok := cachedIDs[job.JobTitle]
 			if !ok {
-				g.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
+				g.notifyNewJob(client.Rest, &job, company.Name, company.URL) // notify on discord if new job
 				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
@@ -112,9 +117,9 @@ func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*dto.GreenhouseJ
 	return &resp, nil
 }
 
-func (g GreenhouseClient) notifyNewJob(client *bot.Client, jobPosting *dto.GreenhouseJobPosting, company string, careerUrl string) {
+func (g GreenhouseClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.GreenhouseJobPosting, company string, careerUrl string) {
 	embed := g.generateNewJobPostingEmbed(jobPosting, company, careerUrl)
-	client.Rest.CreateMessage(
+	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
 		discord.NewMessageCreate().WithEmbeds(embed),
 	)
