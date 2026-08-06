@@ -11,8 +11,12 @@ on:
 
 jobs:
 
-  build:
+  disgo_job:
+    name: Disgo Bot Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./discord-bot
     steps:
     - uses: actions/checkout@v4
 
