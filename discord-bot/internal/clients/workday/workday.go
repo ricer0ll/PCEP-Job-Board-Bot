@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"strings"
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -16,6 +17,7 @@ import (
 var (
 	jobsCache       map[string][]dto.WorkdayJobPosting = make(map[string][]dto.WorkdayJobPosting)
 	companyJsonPath string                             = filepath.Join("internal", "clients", "workday", "companies.json")
+	relevantRoles   []string                           = []string{"developer", "engineer", "software", "architect", "cloud"}
 )
 
 type WorkdayClient struct {
@@ -35,6 +37,8 @@ func (w WorkdayClient) InitJobsCache() {
 	}
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Workday config", len(companies)))
+
+	jobsCache := make(map[string][]dto.WorkdayJobPosting)
 
 	for _, company := range companies {
 		jobs, err := w.getWorkdayJobPostings(
@@ -81,12 +85,11 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 
 		for _, job := range liveJobs {
 			_, ok := cachedIDs[job.BulletFields[0]]
-			if !ok {
+			if !ok && w.isRelevantRole(job.Title) {
 				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
+				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
-
-		jobsCache[company.Name] = liveJobs
 	}
 }
 
@@ -122,7 +125,7 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	}
 	if result.IsStatusFailure() {
 		slog.Error("Post request to workday status code not 200's")
-		return nil, err
+		return nil, fmt.Errorf("workday request failed with status code: %d", result.StatusCode())
 	}
 
 	jobPostings = resp.JobPostings
@@ -149,4 +152,15 @@ func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *dto.WorkdayJobPost
 		WithURL(url)
 
 	return embed
+}
+
+func (w WorkdayClient) isRelevantRole(role string) bool {
+	lowerCasedRole := strings.ToLower(role)
+
+	for _, relevantRole := range relevantRoles {
+		if strings.Contains(lowerCasedRole, relevantRole) {
+			return true
+		}
+	}
+	return false
 }
