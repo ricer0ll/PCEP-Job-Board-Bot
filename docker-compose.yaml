@@ -11,6 +11,8 @@ services:
     depends_on:
       webscraper:
         condition: service_healthy
+    env_file:
+      - .env
 
   webscraper:
     build:

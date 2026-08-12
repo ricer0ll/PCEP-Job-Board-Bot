@@ -18,7 +18,7 @@ Here's my Raspberry Pi that runs the Discord bot 24/7 on the PCEP discord server
 Contributions are also welcomed. The bot is written in Go using the [DisGo](https://github.com/disgoorg/disgo) library. 
 
 ## Running Locally
-You may also run this bot locally on your machine using your own Discord Bot Token and can specify which channel to send notifications to. Create a copy of the `.env.example` and replace the values inside `discord-bot/`.  
+You may also run this bot locally on your machine using your own Discord Bot Token and can specify which channel to send notifications to. Create a copy of the `.env.example`, name it `.env` and replace the values.  
 
 Start the docker container with:  
 `$ docker compose up -d --build`  

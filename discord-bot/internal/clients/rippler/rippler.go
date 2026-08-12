@@ -8,6 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
@@ -20,6 +21,10 @@ var (
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
+
+type DiscordRestClient interface {
+	CreateMessage(channelID snowflake.ID, messageCreate discord.MessageCreate, opts ...rest.RequestOpt) (*discord.Message, error)
+}
 
 type RipplerClient struct {
 	restyClient *resty.Client
@@ -80,7 +85,7 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 		for _, job := range liveJobsPosting {
 			_, ok := cachedIDs[job.JobTitle]
 			if !ok {
-				r.notifyNewJob(client, &job, company.Name, company.URL) // notify on discord if new job
+				r.notifyNewJob(client.Rest, &job, company.Name, company.URL) // notify on discord if new job
 				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
@@ -113,9 +118,9 @@ func (r RipplerClient) getRipplerJobPostings(url string) (*dto.RipplerJobPosting
 	return &resp, nil
 }
 
-func (r RipplerClient) notifyNewJob(client *bot.Client, jobPosting *dto.RipplerJobPosting, company string, careerUrl string) {
+func (r RipplerClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.RipplerJobPosting, company string, careerUrl string) {
 	embed := r.generateNewJobPostingEmbed(jobPosting, company, careerUrl)
-	client.Rest.CreateMessage(
+	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
 		discord.NewMessageCreate().WithEmbeds(embed),
 	)

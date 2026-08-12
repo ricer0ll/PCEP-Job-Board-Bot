@@ -8,6 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
@@ -19,6 +20,10 @@ var (
 	companyJsonPath string                             = filepath.Join("internal", "clients", "workday", "companies.json")
 	relevantRoles   []string                           = []string{"developer", "engineer", "software", "architect", "cloud"}
 )
+
+type DiscordRestClient interface {
+	CreateMessage(channelID snowflake.ID, messageCreate discord.MessageCreate, opts ...rest.RequestOpt) (*discord.Message, error)
+}
 
 type WorkdayClient struct {
 	restyClient *resty.Client
@@ -86,7 +91,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 		for _, job := range liveJobs {
 			_, ok := cachedIDs[job.BulletFields[0]]
 			if !ok && w.isRelevantRole(job.Title) {
-				w.notifyNewJob(client, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
+				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
 				jobsCache[company.Name] = append(jobsCache[company.Name], job)
 			}
 		}
@@ -132,9 +137,9 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	return jobPostings, nil
 }
 
-func (w WorkdayClient) notifyNewJob(client *bot.Client, jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) {
+func (w WorkdayClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) {
 	embed := w.generateNewJobPostingEmbed(jobPosting, company, workdayURL)
-	client.Rest.CreateMessage(
+	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
 		discord.NewMessageCreate().WithEmbeds(embed),
 	)

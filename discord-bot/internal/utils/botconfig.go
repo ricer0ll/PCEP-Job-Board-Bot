@@ -6,7 +6,6 @@ import (
 
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/gateway"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -30,15 +29,11 @@ func GetDiscordChannelID() string {
 		return channelID
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		slog.Warn("Unable to load .env file. Fetching system environment variables...")
-	}
-
 	channelID = os.Getenv("CHANNEL_ID")
 	if channelID == "" {
-		panic("Unable to load CHANNEL_ID environment variable.")
+		slog.Error("Unable to load CHANNEL_ID environment variable.")
 	}
+
 	loaded = true
 	return channelID
 }

@@ -98,6 +98,6 @@ async def get_rippling_jobs(request: RipplerJobRequest) -> RipplerJobResponse:
         else:
             print("Error: Could not locate the job board iframe container.")
 
-        browser.close()
+        await browser.close()
 
         return resp
