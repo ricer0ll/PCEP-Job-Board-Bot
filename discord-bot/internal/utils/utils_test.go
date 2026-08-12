@@ -19,6 +19,7 @@ func TestGetDiscordChannelID(t *testing.T) {
 }
 
 func TestGetDiscordChannelIDFail(t *testing.T) {
+	loaded = false
 	token := GetDiscordChannelID()
 
 	if token != "" {
