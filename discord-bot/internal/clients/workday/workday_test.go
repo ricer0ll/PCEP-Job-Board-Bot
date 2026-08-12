@@ -29,7 +29,7 @@ func TestIsRelevantRole(t *testing.T) {
 	}
 }
 
-func TestGenerateNewJobPostingEmbed(t *testing.T) {
+func TestGenerateNewJobPostingEmbedWorkday(t *testing.T) {
 	client := &WorkdayClient{}
 
 	companyName := "Contoso LLC"
