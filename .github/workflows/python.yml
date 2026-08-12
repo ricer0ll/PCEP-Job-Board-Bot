@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  webscraper_job:
+    name: Webscraper API Tests
     runs-on: ubuntu-latest
     defaults:
       run:
