@@ -31,7 +31,37 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-  
+
+  jobs-db-service:
+    build:
+      context: ./jobs-db-service
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - TZ=America/Los_Angeles
+    networks:
+      - pcep
+    ports:
+      - 8080:8080
+
+  db:
+    image: postgres:18-alpine
+    restart: always
+    networks:
+      - pcep
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql
+
+
+volumes:
+  postgres:
+
 networks:
   pcep:
     driver: bridge
