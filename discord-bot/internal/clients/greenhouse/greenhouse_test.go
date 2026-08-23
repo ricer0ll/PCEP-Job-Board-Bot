@@ -7,7 +7,7 @@ import (
 	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
 )
 
-func TestGenerateNewJobPostingEmbedRippler(t *testing.T) {
+func TestGenerateNewJobPostingEmbedGreenhouse(t *testing.T) {
 	client := &GreenhouseClient{}
 
 	companyName := "Contoso LLC"
