@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS public.companies (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS public.jobs (
+    id TEXT PRIMARY KEY,
+    company_id BIGINT NOT NULL
+);
