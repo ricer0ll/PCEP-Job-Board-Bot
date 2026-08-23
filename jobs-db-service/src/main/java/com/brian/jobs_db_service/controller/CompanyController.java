@@ -5,6 +5,7 @@ import com.brian.jobs_db_service.model.dto.company.AddCompanyRequest;
 import com.brian.jobs_db_service.model.dto.company.AddCompanyResponse;
 import com.brian.jobs_db_service.model.dto.company.GetCompanyResponse;
 import com.brian.jobs_db_service.model.entity.Company;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/company")
+@Tag(name = "Companies")
 public class CompanyController {
     private final CompanyDao companyDao;
 

@@ -4,5 +4,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface JobCheckService {
-    public Boolean jobAlreadyExists(String id);
+    public Boolean jobAlreadyExists(String jobId, String companyName);
 }
