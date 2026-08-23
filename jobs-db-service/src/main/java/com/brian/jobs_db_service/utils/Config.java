@@ -1,25 +1,21 @@
 package com.brian.jobs_db_service.utils;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.stereotype.Component;
 
 public final class Config {
     public static String getDbUser() {
         String user = System.getenv("POSTGRES_USER");
         if (user == null) {
-            Dotenv dotenv = Dotenv.configure().load();
-            return dotenv.get("POSTGRES_USER");
+            throw new RuntimeException("POSTGRES_USER environment variable not found");
         }
-
         return user;
     }
 
-    public static String getDbPass() {
+    public static String getDbPass() throws Exception {
         String pass = System.getenv("POSTGRES_PASSWORD");
         if (pass == null) {
-            Dotenv dotenv = Dotenv.configure().load();
-            return dotenv.get("POSTGRES_PASSWORD");
+            throw new RuntimeException("POSTGRES_PASSWORD environment variable not found");
         }
-
         return pass;
     }
 
