@@ -106,11 +106,11 @@ func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*dto.GreenhouseJ
 		Post(webscraperServiceUrl)
 
 	if err != nil {
-		slog.Error("Failed to post request to workday")
+		slog.Error("Failed to post request to webscraper")
 		return nil, err
 	}
 	if result.IsStatusFailure() {
-		slog.Error("Post request to workday status code not 200's")
+		slog.Error("Post request to webscraper status code not 200's")
 		return nil, fmt.Errorf("webscraper request failed with status code: %d", result.StatusCode())
 	}
 
