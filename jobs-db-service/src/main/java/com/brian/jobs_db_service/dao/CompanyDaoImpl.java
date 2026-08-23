@@ -15,16 +15,10 @@ import java.util.Optional;
 @Repository
 public class CompanyDaoImpl implements CompanyDao {
     private static final String JDBI_URI_PREFIX = "jdbc:postgresql://";
-    Jdbi jdbi;
+    private final Jdbi jdbi;
 
-    public CompanyDaoImpl() throws Exception {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(formatUri(Config.getDbUri()));
-        hikariConfig.setUsername(Config.getDbUser());
-        hikariConfig.setPassword(Config.getDbPass());
-
-        HikariDataSource ds = new HikariDataSource(hikariConfig);
-        jdbi = Jdbi.create(ds);
+    public CompanyDaoImpl(Jdbi jdbi) throws Exception {
+        this.jdbi = jdbi;
     }
 
     private String formatUri(String uri) {
@@ -54,13 +48,13 @@ public class CompanyDaoImpl implements CompanyDao {
     }
 
     @Override
-    public Company addCompany(String name) {
+    public Optional<Company> addCompany(String name) {
         return jdbi.withHandle(handle -> {
             Query query = handle
                     .createQuery("select * from public.add_company(:company_name);")
                     .bind("company_name", name)
                     .registerRowMapper(BeanMapper.factory(Company.class));
-            return query.mapTo(Company.class).one();
+            return query.mapTo(Company.class).findOne();
         });
     }
 }

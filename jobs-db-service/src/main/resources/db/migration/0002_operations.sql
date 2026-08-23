@@ -7,18 +7,15 @@
 CREATE OR REPLACE FUNCTION public.add_company(
     p_name TEXT
 )
-RETURNS public.companies
+RETURNS SETOF public.companies
 LANGUAGE plpgsql
 AS $$
-DECLARE
-    v_row public.companies;
 BEGIN
+    RETURN QUERY
     INSERT INTO public.companies (name)
     VALUES (p_name)
     ON CONFLICT (name) DO NOTHING
-    RETURNING * INTO v_row;
-
-    RETURN v_row;
+    RETURNING *;
 END;
 $$;
 
@@ -53,17 +50,15 @@ CREATE OR REPLACE FUNCTION public.add_job(
     p_id TEXT,
     p_company_id BIGINT
 )
-RETURNS public.jobs
+RETURNS SETOF public.jobs
 LANGUAGE plpgsql
 AS $$
-DECLARE
-    v_row public.jobs;
 BEGIN
+    RETURN QUERY
     INSERT INTO public.jobs (id, company_id)
     VALUES (p_id, p_company_id)
-    RETURNING * INTO v_row;
-
-    RETURN v_row;
+    ON CONFLICT (id) DO NOTHING
+    RETURNING *;
 END;
 $$;
 

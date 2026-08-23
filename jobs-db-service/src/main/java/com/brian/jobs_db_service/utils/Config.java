@@ -1,8 +1,10 @@
 package com.brian.jobs_db_service.utils;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-public final class Config {
+@Configuration
+public class Config {
     public static String getDbUser() {
         String user = System.getenv("POSTGRES_USER");
         if (user == null) {

@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface CompanyDao {
     public Optional<Company> getCompanyById(Long id);
     public Optional<Company> getCompanyByName(String name);
-    public Company addCompany(String name);
+    public Optional<Company> addCompany(String name);
 }

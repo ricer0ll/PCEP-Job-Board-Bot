@@ -5,8 +5,10 @@ import com.brian.jobs_db_service.model.dto.company.AddCompanyRequest;
 import com.brian.jobs_db_service.model.dto.company.AddCompanyResponse;
 import com.brian.jobs_db_service.model.dto.company.GetCompanyResponse;
 import com.brian.jobs_db_service.model.entity.Company;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -19,11 +21,12 @@ public class CompanyController {
         this.companyDao = companyDao;
     }
 
-    @PutMapping
-    public AddCompanyResponse addCompany(@RequestBody AddCompanyRequest request) {
-        Company company = companyDao.addCompany(request.getName());
+    @PostMapping
+    public ResponseEntity<AddCompanyResponse> addCompany(@RequestBody AddCompanyRequest request) {
+        Company company = companyDao.addCompany(request.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Company already exists"));
 
-        return new AddCompanyResponse(company.getId(), company.getName());
+        return ResponseEntity.ok(new AddCompanyResponse(company.getId(), company.getName()));
     }
 
     @GetMapping("/{company_id}")
