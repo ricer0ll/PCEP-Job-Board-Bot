@@ -5,6 +5,8 @@ import com.brian.jobs_db_service.model.dto.job.*;
 import com.brian.jobs_db_service.model.entity.Job;
 import com.brian.jobs_db_service.service.AddJobService;
 import com.brian.jobs_db_service.service.JobCheckService;
+import com.brian.jobs_db_service.utils.Config;
+import com.google.common.hash.Hashing;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @RestController
@@ -34,7 +37,12 @@ public class JobController {
 
     @PostMapping("/check")
     public JobExistsResponse checkIfJobExists(@RequestBody JobExistsRequest request) {
-        Boolean exists = jobCheckService.jobAlreadyExists(request.getJobId(), request.getCompanyName());
+        Boolean exists = jobCheckService.jobAlreadyExists(
+                Config.getJobId(
+                        request.getJobTitle(),
+                        request.getCompanyName()
+                )
+        );
 
         return new JobExistsResponse(exists);
     }
@@ -42,7 +50,7 @@ public class JobController {
     @PostMapping
     public ResponseEntity<AddJobResponse> addJobResponse(@RequestBody AddJobRequest request) throws Exception {
         Job addedJob = addJobService
-                .addJob(request.getJobName(), request.getCompanyName())
+                .addJob(request.getJobTitle(), request.getCompanyName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Job already exists"));
 
         return ResponseEntity.ok(new AddJobResponse(addedJob.getId(), addedJob.getCompanyId()));

@@ -6,6 +6,6 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor
 public class JobExistsRequest {
-    private String jobId;
+    private String jobTitle;
     private String companyName;
 }

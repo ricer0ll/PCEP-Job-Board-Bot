@@ -4,6 +4,7 @@ import com.brian.jobs_db_service.dao.CompanyDao;
 import com.brian.jobs_db_service.dao.JobDao;
 import com.brian.jobs_db_service.model.entity.Company;
 import com.brian.jobs_db_service.model.entity.Job;
+import com.brian.jobs_db_service.utils.Config;
 import com.google.common.hash.Hashing;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class AddJobServiceImpl implements AddJobService {
     }
 
     @Override
-    public Optional<Job> addJob(String jobName, String companyName) throws Exception {
+    public Optional<Job> addJob(String jobTitle, String companyName) throws Exception {
         Long companyId;
 
         Optional<Company> companyOpt = companyDao.getCompanyByName(companyName);
@@ -35,11 +36,7 @@ public class AddJobServiceImpl implements AddJobService {
             companyId = companyOpt.get().getId();
         }
 
-        String newJobId = Hashing
-                .sha256()
-                .hashString(jobName + companyName, StandardCharsets.UTF_8)
-                .toString();
-
+        String newJobId = Config.getJobId(jobTitle, companyName);
         return jobDao.addJob(newJobId, companyId);
     }
 }

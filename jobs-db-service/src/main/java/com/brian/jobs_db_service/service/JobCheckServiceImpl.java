@@ -20,20 +20,8 @@ public class JobCheckServiceImpl implements JobCheckService {
     }
 
     @Override
-    public Boolean jobAlreadyExists(String jobId, String companyName) {
+    public Boolean jobAlreadyExists(String jobId) {
         Optional<Job> jobOpt = jobDao.getJob(jobId);
-        if (jobOpt.isEmpty()) {
-            return false;
-        }
-
-        Optional<Company> companyOpt = companyDao.getCompanyByName(companyName);
-        if (companyOpt.isEmpty()) {
-            return false;
-        }
-
-        Job job = jobOpt.get();
-        Company company = companyOpt.get();
-
-        return job.getCompanyId().equals(company.getId());
+        return jobOpt.isPresent();
     }
 }
