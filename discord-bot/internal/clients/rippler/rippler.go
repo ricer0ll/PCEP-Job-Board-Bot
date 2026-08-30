@@ -10,14 +10,15 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/rippler"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/jobsdb"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
 	"resty.dev/v3"
 )
 
 var (
-	jobsCache       map[string][]dto.RipplerJobPosting = make(map[string][]dto.RipplerJobPosting)
-	companyJsonPath string                             = filepath.Join("internal", "clients", "rippler", "companies.json")
+	jobsCache       map[string][]rippler.RipplerJobPosting = make(map[string][]rippler.RipplerJobPosting)
+	companyJsonPath string                                 = filepath.Join("internal", "clients", "rippler", "companies.json")
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
@@ -27,12 +28,14 @@ type DiscordRestClient interface {
 }
 
 type RipplerClient struct {
-	restyClient *resty.Client
+	restyClient  *resty.Client
+	jobsDbClient *jobsdb.JobsDbClient
 }
 
-func NewRipplerClient(restyClient *resty.Client) *RipplerClient {
+func NewRipplerClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbClient) *RipplerClient {
 	return &RipplerClient{
-		restyClient: restyClient,
+		restyClient:  restyClient,
+		jobsDbClient: jobsDbClient,
 	}
 }
 
@@ -44,7 +47,7 @@ func (r RipplerClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Rippler config", len(companies)))
 
-	jobsCache := make(map[string][]dto.RipplerJobPosting)
+	jobsCache := make(map[string][]rippler.RipplerJobPosting)
 
 	for _, company := range companies {
 		companyName := company.Name
@@ -75,29 +78,28 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 
 		liveJobsPosting := resp.Jobs
 
-		// add job title to cache
-		// (yes, ik this is bad, but greenhouse doesn't give me a way to get job's id...)
-		cachedIDs := make(map[string]struct{})
-		for _, job := range jobsCache[company.Name] {
-			cachedIDs[job.JobTitle] = struct{}{}
-		}
-
+		// check if job already exists. if not, add it to db and notify
 		for _, job := range liveJobsPosting {
-			_, ok := cachedIDs[job.JobTitle]
-			if !ok {
-				r.notifyNewJob(client.Rest, &job, company.Name, company.URL) // notify on discord if new job
-				jobsCache[company.Name] = append(jobsCache[company.Name], job)
+			exists, err := r.jobsDbClient.JobAlreadyExists(job.JobTitle, company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if exists {
+				r.notifyNewJob(client.Rest, &job, company.Name, company.URL)
+				r.jobsDbClient.AddJob(job.JobTitle, company.Name)
 			}
 		}
 	}
 
 }
 
-func (r RipplerClient) getRipplerJobPostings(url string) (*dto.RipplerJobPostingResponse, error) {
-	request := dto.RipplerJobPostingRequest{
+func (r RipplerClient) getRipplerJobPostings(url string) (*rippler.RipplerJobPostingResponse, error) {
+	request := rippler.RipplerJobPostingRequest{
 		URL: url,
 	}
-	resp := dto.RipplerJobPostingResponse{}
+	resp := rippler.RipplerJobPostingResponse{}
 
 	result, err := r.restyClient.R().
 		SetContentType("application/json").
@@ -118,7 +120,7 @@ func (r RipplerClient) getRipplerJobPostings(url string) (*dto.RipplerJobPosting
 	return &resp, nil
 }
 
-func (r RipplerClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.RipplerJobPosting, company string, careerUrl string) {
+func (r RipplerClient) notifyNewJob(client DiscordRestClient, jobPosting *rippler.RipplerJobPosting, company string, careerUrl string) {
 	embed := r.generateNewJobPostingEmbed(jobPosting, company, careerUrl)
 	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
@@ -127,7 +129,7 @@ func (r RipplerClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.Ri
 
 }
 
-func (r RipplerClient) generateNewJobPostingEmbed(jobPosting *dto.RipplerJobPosting, company string, careerUrl string) discord.Embed {
+func (r RipplerClient) generateNewJobPostingEmbed(jobPosting *rippler.RipplerJobPosting, company string, careerUrl string) discord.Embed {
 	var title string = fmt.Sprintf("New Job Posting from %s!", company)
 	var description string = fmt.Sprintf("Position: **%s**\nLocation: %s", jobPosting.JobTitle, jobPosting.Location)
 	var url string = careerUrl

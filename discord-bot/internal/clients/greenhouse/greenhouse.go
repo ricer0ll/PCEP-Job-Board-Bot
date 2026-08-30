@@ -10,14 +10,15 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/greenhouse"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/jobsdb"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
 	"resty.dev/v3"
 )
 
 var (
-	jobsCache       map[string][]dto.GreenhouseJobPosting = make(map[string][]dto.GreenhouseJobPosting)
-	companyJsonPath string                                = filepath.Join("internal", "clients", "greenhouse", "companies.json")
+	jobsCache       map[string][]greenhouse.GreenhouseJobPosting = make(map[string][]greenhouse.GreenhouseJobPosting)
+	companyJsonPath string                                       = filepath.Join("internal", "clients", "greenhouse", "companies.json")
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
@@ -27,12 +28,14 @@ type DiscordRestClient interface {
 }
 
 type GreenhouseClient struct {
-	restyClient *resty.Client
+	restyClient  *resty.Client
+	jobsDbClient *jobsdb.JobsDbClient
 }
 
-func NewGreenhouseClient(restyClient *resty.Client) *GreenhouseClient {
+func NewGreenhouseClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbClient) *GreenhouseClient {
 	return &GreenhouseClient{
-		restyClient: restyClient,
+		restyClient:  restyClient,
+		jobsDbClient: jobsDbClient,
 	}
 }
 
@@ -44,7 +47,7 @@ func (g GreenhouseClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Greenhouse config", len(companies)))
 
-	jobsCache := make(map[string][]dto.GreenhouseJobPosting)
+	jobsCache := make(map[string][]greenhouse.GreenhouseJobPosting)
 
 	for _, company := range companies {
 		companyName := company.Name
@@ -75,28 +78,27 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 
 		liveJobsPosting := resp.Jobs
 
-		// add job title to cache
-		// (yes, ik this is bad, but greenhouse doesn't give me a way to get job's id...)
-		cachedIDs := make(map[string]struct{})
-		for _, job := range jobsCache[company.Name] {
-			cachedIDs[job.JobTitle] = struct{}{}
-		}
-
+		// check if job already exists. if not, add it to db and notify
 		for _, job := range liveJobsPosting {
-			_, ok := cachedIDs[job.JobTitle]
-			if !ok {
-				g.notifyNewJob(client.Rest, &job, company.Name, company.URL) // notify on discord if new job
-				jobsCache[company.Name] = append(jobsCache[company.Name], job)
+			exists, err := g.jobsDbClient.JobAlreadyExists(job.JobTitle, company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if exists {
+				g.notifyNewJob(client.Rest, &job, company.Name, company.URL)
+				g.jobsDbClient.AddJob(job.JobTitle, company.Name)
 			}
 		}
 	}
 }
 
-func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*dto.GreenhouseJobPostingResponse, error) {
-	request := dto.GreenhouseJobPostingRequest{
+func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*greenhouse.GreenhouseJobPostingResponse, error) {
+	request := greenhouse.GreenhouseJobPostingRequest{
 		URL: url,
 	}
-	resp := dto.GreenhouseJobPostingResponse{}
+	resp := greenhouse.GreenhouseJobPostingResponse{}
 
 	result, err := g.restyClient.R().
 		SetContentType("application/json").
@@ -117,7 +119,7 @@ func (g GreenhouseClient) getGreenhouseJobPostings(url string) (*dto.GreenhouseJ
 	return &resp, nil
 }
 
-func (g GreenhouseClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.GreenhouseJobPosting, company string, careerUrl string) {
+func (g GreenhouseClient) notifyNewJob(client DiscordRestClient, jobPosting *greenhouse.GreenhouseJobPosting, company string, careerUrl string) {
 	embed := g.generateNewJobPostingEmbed(jobPosting, company, careerUrl)
 	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
@@ -126,7 +128,7 @@ func (g GreenhouseClient) notifyNewJob(client DiscordRestClient, jobPosting *dto
 
 }
 
-func (g GreenhouseClient) generateNewJobPostingEmbed(jobPosting *dto.GreenhouseJobPosting, company string, careerUrl string) discord.Embed {
+func (g GreenhouseClient) generateNewJobPostingEmbed(jobPosting *greenhouse.GreenhouseJobPosting, company string, careerUrl string) discord.Embed {
 	var title string = fmt.Sprintf("New Job Posting from %s!", company)
 	var description string = fmt.Sprintf("Position: **%s**\nLocation: %s", jobPosting.JobTitle, jobPosting.Location)
 	var url string = careerUrl

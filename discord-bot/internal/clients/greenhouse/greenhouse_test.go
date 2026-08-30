@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/greenhouse"
 )
 
 func TestGenerateNewJobPostingEmbedGreenhouse(t *testing.T) {
@@ -12,7 +12,7 @@ func TestGenerateNewJobPostingEmbedGreenhouse(t *testing.T) {
 
 	companyName := "Contoso LLC"
 	careersURL := "https://contoso.com"
-	jobPosting := &dto.GreenhouseJobPosting{
+	jobPosting := &greenhouse.GreenhouseJobPosting{
 		JobTitle: "Cloud Engineer",
 		Location: "Remote",
 	}

@@ -6,6 +6,7 @@ import com.brian.jobs_db_service.model.entity.Job;
 import com.brian.jobs_db_service.service.AddJobService;
 import com.brian.jobs_db_service.service.JobCheckService;
 import com.brian.jobs_db_service.utils.Config;
+import com.brian.jobs_db_service.utils.HasherUtil;
 import com.google.common.hash.Hashing;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class JobController {
     @PostMapping("/check")
     public JobExistsResponse checkIfJobExists(@RequestBody JobExistsRequest request) {
         Boolean exists = jobCheckService.jobAlreadyExists(
-                Config.getJobId(
+                HasherUtil.getJobId(
                         request.getJobTitle(),
                         request.getCompanyName()
                 )

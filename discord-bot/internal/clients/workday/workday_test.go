@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday"
 )
 
 func TestIsRelevantRole(t *testing.T) {
@@ -34,7 +34,7 @@ func TestGenerateNewJobPostingEmbedWorkday(t *testing.T) {
 
 	companyName := "Contoso LLC"
 	workdayURL := "https://workday.com"
-	jobPosting := &dto.WorkdayJobPosting{
+	jobPosting := &workday.WorkdayJobPosting{
 		Title:         "Software Engineer",
 		ExternalPath:  "/test",
 		LocationsText: "Portland, OR",

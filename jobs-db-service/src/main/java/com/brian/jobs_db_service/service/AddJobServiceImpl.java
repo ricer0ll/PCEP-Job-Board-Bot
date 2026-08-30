@@ -5,6 +5,7 @@ import com.brian.jobs_db_service.dao.JobDao;
 import com.brian.jobs_db_service.model.entity.Company;
 import com.brian.jobs_db_service.model.entity.Job;
 import com.brian.jobs_db_service.utils.Config;
+import com.brian.jobs_db_service.utils.HasherUtil;
 import com.google.common.hash.Hashing;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +28,15 @@ public class AddJobServiceImpl implements AddJobService {
 
         Optional<Company> companyOpt = companyDao.getCompanyByName(companyName);
         if (companyOpt.isEmpty()) {
-            companyDao.addCompany(companyName);
             companyId = companyDao
-                    .getCompanyByName(companyName)
-                    .orElseThrow(() -> new Exception("Failed to get company after creation"))
+                    .addCompany(companyName)
+                    .orElseThrow(() -> new Exception("Failed to create company"))
                     .getId();
         } else {
             companyId = companyOpt.get().getId();
         }
 
-        String newJobId = Config.getJobId(jobTitle, companyName);
+        String newJobId = HasherUtil.getJobId(jobTitle, companyName);
         return jobDao.addJob(newJobId, companyId);
     }
 }
