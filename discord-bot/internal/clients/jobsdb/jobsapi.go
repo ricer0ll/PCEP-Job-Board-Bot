@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	baseURL string = "https://jobs-db-service:8080/v1"
+	baseURL string = "http://jobs-db-service:8080/v1"
 )
 
 type JobsDbClient struct {
