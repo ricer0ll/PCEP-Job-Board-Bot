@@ -69,6 +69,8 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 		panic("Unable to load companies")
 	}
 
+	slog.Info("Getting rippler jobs")
+
 	for _, company := range companies {
 		resp, err := r.getRipplerJobPostings(company.URL)
 		if err != nil {

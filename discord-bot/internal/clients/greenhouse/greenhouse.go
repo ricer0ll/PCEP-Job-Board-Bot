@@ -69,6 +69,8 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 		panic("Unable to load companies")
 	}
 
+	slog.Info("Getting greenhouse jobs")
+
 	for _, company := range companies {
 		resp, err := g.getGreenhouseJobPostings(company.URL)
 		if err != nil {

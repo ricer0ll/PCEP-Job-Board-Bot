@@ -70,6 +70,8 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 		panic("Unable to load companies")
 	}
 
+	slog.Info("Getting workday jobs")
+
 	for _, company := range companies {
 		// get workday job postings
 		liveJobs, err := w.getWorkdayJobPostings(
