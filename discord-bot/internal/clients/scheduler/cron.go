@@ -53,7 +53,7 @@ func (s *SchedulerClient) InitCronJob(client *bot.Client) (gocron.Scheduler, err
 		c.InitJobsCache()
 
 		_, err = scheduler.NewJob(
-			gocron.CronJob("0 6-12 * * 1-5", false),
+			gocron.CronJob("0 6-18 * * 1-5", false),
 			gocron.NewTask(c.GetNewJobPostings, client),
 		)
 		if err != nil {
