@@ -87,7 +87,7 @@ func (r RipplerClient) GetNewJobPostings(client *bot.Client) {
 				continue
 			}
 
-			if exists {
+			if !exists {
 				r.notifyNewJob(client.Rest, &job, company.Name, company.URL)
 				r.jobsDbClient.AddJob(job.JobTitle, company.Name)
 			}

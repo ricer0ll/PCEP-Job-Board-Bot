@@ -94,7 +94,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 				continue
 			}
 
-			if exists {
+			if !exists {
 				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
 				w.jobsDbClient.AddJob(job.Title, company.Name)
 			}

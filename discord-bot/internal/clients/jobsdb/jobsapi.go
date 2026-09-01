@@ -63,7 +63,7 @@ func (j JobsDbClient) AddJob(jobTitle string, companyName string) {
 		return
 	}
 	if result.IsStatusFailure() {
-		slog.Error("%s from %s already exists", jobTitle, companyName)
+		slog.Warn(fmt.Sprintf("%s from %s already exists", jobTitle, companyName))
 		return
 	}
 

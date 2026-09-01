@@ -87,7 +87,7 @@ func (g GreenhouseClient) GetNewJobPostings(client *bot.Client) {
 				continue
 			}
 
-			if exists {
+			if !exists {
 				g.notifyNewJob(client.Rest, &job, company.Name, company.URL)
 				g.jobsDbClient.AddJob(job.JobTitle, company.Name)
 			}
