@@ -17,8 +17,7 @@ import (
 )
 
 var (
-	jobsCache       map[string][]rippler.RipplerJobPosting = make(map[string][]rippler.RipplerJobPosting)
-	companyJsonPath string                                 = filepath.Join("internal", "clients", "rippler", "companies.json")
+	companyJsonPath string = filepath.Join("internal", "clients", "rippler", "companies.json")
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
@@ -47,8 +46,6 @@ func (r RipplerClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Rippler config", len(companies)))
 
-	jobsCache := make(map[string][]rippler.RipplerJobPosting)
-
 	for _, company := range companies {
 		companyName := company.Name
 		url := company.URL
@@ -59,7 +56,9 @@ func (r RipplerClient) InitJobsCache() {
 			continue
 		}
 
-		jobsCache[companyName] = append(jobsCache[companyName], jobPostings.Jobs...)
+		for _, job := range jobPostings.Jobs {
+			r.jobsDbClient.AddJob(job.JobTitle, companyName)
+		}
 	}
 }
 

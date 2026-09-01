@@ -17,8 +17,7 @@ import (
 )
 
 var (
-	jobsCache       map[string][]greenhouse.GreenhouseJobPosting = make(map[string][]greenhouse.GreenhouseJobPosting)
-	companyJsonPath string                                       = filepath.Join("internal", "clients", "greenhouse", "companies.json")
+	companyJsonPath string = filepath.Join("internal", "clients", "greenhouse", "companies.json")
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/greenhouse/jobs"
@@ -47,8 +46,6 @@ func (g GreenhouseClient) InitJobsCache() {
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Greenhouse config", len(companies)))
 
-	jobsCache := make(map[string][]greenhouse.GreenhouseJobPosting)
-
 	for _, company := range companies {
 		companyName := company.Name
 		url := company.URL
@@ -59,7 +56,9 @@ func (g GreenhouseClient) InitJobsCache() {
 			continue
 		}
 
-		jobsCache[companyName] = append(jobsCache[companyName], jobPostings.Jobs...)
+		for _, job := range jobPostings.Jobs {
+			g.jobsDbClient.AddJob(job.JobTitle, companyName)
+		}
 	}
 }
 
