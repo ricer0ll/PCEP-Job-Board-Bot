@@ -33,10 +33,6 @@ func NewSchedulerClient(
 			greenhouseClient,
 			ripplerClient,
 		},
-		nonWorkdayClients: []jobClient{
-			greenhouseClient,
-			ripplerClient,
-		},
 	}
 }
 
@@ -62,18 +58,6 @@ func (s *SchedulerClient) InitCronJob(client *bot.Client) (gocron.Scheduler, err
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to schedule posting job: %w", err)
-		}
-	}
-
-	// Need to reset non workday clients as they dont use ids
-	for _, clientObj := range s.nonWorkdayClients {
-		c := clientObj
-		_, err = scheduler.NewJob(
-			gocron.CronJob("0 0 * * 0", false),
-			gocron.NewTask(c.InitJobsCache),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to schedule cache reset job: %w", err)
 		}
 	}
 
