@@ -59,7 +59,7 @@ func (w WorkdayClient) InitJobsCache() {
 		}
 
 		for _, job := range jobs {
-			w.jobsDbClient.AddJob(job.Title, company.Name)
+			w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name) // workday is a lil different. we pass the JR instead.
 		}
 	}
 }
@@ -88,7 +88,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 
 		// check if job already exists. if not, add it to db and notify
 		for _, job := range liveJobs {
-			exists, err := w.jobsDbClient.JobAlreadyExists(job.Title, company.Name)
+			exists, err := w.jobsDbClient.JobAlreadyExists(w.getWorkdayJobId(&job), company.Name)
 			if err != nil {
 				slog.Error(err.Error())
 				continue
@@ -96,7 +96,7 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 
 			if !exists {
 				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
-				w.jobsDbClient.AddJob(job.Title, company.Name)
+				w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name)
 			}
 		}
 	}
@@ -172,4 +172,13 @@ func (w WorkdayClient) isRelevantRole(role string) bool {
 		}
 	}
 	return false
+}
+
+// This either returns the bulletfields or the job title
+func (w WorkdayClient) getWorkdayJobId(job *workday.WorkdayJobPosting) string {
+	if len(job.BulletFields) == 0 {
+		return job.Title
+	}
+
+	return strings.Join(job.BulletFields, "")
 }
