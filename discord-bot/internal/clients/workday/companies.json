@@ -1,6 +1,28 @@
 {
     "companies": [
         {
+            "Name": "Cambia Health Solutions",
+            "WorkdayBaseURL": "https://cambiahealth.wd504.myworkdayjobs.com/en-US/External",
+            "WorkdayRequestURL": "https://cambiahealth.wd504.myworkdayjobs.com/wday/cxs/cambiahealth/External/jobs",
+            "JobFamilyGroup": [
+                "6b82f609cfb9013acb764141b61c3112"
+            ],
+            "JobFamily": [],
+            "LocationCountry": [],
+            "Locations": []
+        },
+        {
+            "Name": "CDK Global",
+            "WorkdayBaseURL": "https://cdk.wd1.myworkdayjobs.com/en-US/CDK",
+            "WorkdayRequestURL": "https://cdk.wd1.myworkdayjobs.com/wday/cxs/cdk/CDK/jobs",
+            "JobFamilyGroup": [
+                "d2b75d1f73320195b4534a4b2c015919"
+            ],
+            "JobFamily": [],
+            "LocationCountry": [],
+            "Locations": []
+        },
+        {
             "Name": "The Standard",
             "WorkdayBaseURL": "https://standard.wd1.myworkdayjobs.com/en-US/Search",
             "WorkdayRequestURL": "https://standard.wd1.myworkdayjobs.com/wday/cxs/standard/Search/jobs",
