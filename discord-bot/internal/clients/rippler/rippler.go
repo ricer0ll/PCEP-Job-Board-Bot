@@ -38,7 +38,7 @@ func NewRipplerClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbClie
 	}
 }
 
-func (r RipplerClient) InitJobsCache() {
+func (r RipplerClient) InitJobsCache(client *bot.Client) {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
 		panic(err)

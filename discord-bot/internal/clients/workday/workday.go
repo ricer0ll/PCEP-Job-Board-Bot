@@ -37,7 +37,7 @@ func NewWorkdayClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbClie
 	}
 }
 
-func (w WorkdayClient) InitJobsCache() {
+func (w WorkdayClient) InitJobsCache(client *bot.Client) {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
 		panic(err)
@@ -59,7 +59,16 @@ func (w WorkdayClient) InitJobsCache() {
 		}
 
 		for _, job := range jobs {
-			w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name) // workday is a lil different. we pass the JR instead.
+			exists, err := w.jobsDbClient.JobAlreadyExists(w.getWorkdayJobId(&job), company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if !exists {
+				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
+				w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name) // workday is a lil different. we pass the JR instead.
+			}
 		}
 	}
 }

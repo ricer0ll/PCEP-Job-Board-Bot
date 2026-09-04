@@ -38,7 +38,7 @@ func NewGreenhouseClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbC
 	}
 }
 
-func (g GreenhouseClient) InitJobsCache() {
+func (g GreenhouseClient) InitJobsCache(client *bot.Client) {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
 		panic(err)

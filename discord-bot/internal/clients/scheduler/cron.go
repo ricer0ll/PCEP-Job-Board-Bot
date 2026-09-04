@@ -13,7 +13,7 @@ import (
 )
 
 type jobClient interface {
-	InitJobsCache()
+	InitJobsCache(client *bot.Client)
 	GetNewJobPostings(client *bot.Client)
 }
 
@@ -50,7 +50,7 @@ func (s *SchedulerClient) InitCronJob(client *bot.Client) (gocron.Scheduler, err
 
 	for _, clientObj := range s.targetClients {
 		c := clientObj
-		c.InitJobsCache()
+		c.InitJobsCache(client)
 
 		_, err = scheduler.NewJob(
 			gocron.CronJob("0 6-18 * * 1-5", false),
