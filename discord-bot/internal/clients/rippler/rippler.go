@@ -57,7 +57,16 @@ func (r RipplerClient) InitJobsCache(client *bot.Client) {
 		}
 
 		for _, job := range jobPostings.Jobs {
-			r.jobsDbClient.AddJob(job.JobTitle, companyName)
+			exists, err := r.jobsDbClient.JobAlreadyExists(job.JobTitle, company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if !exists {
+				r.notifyNewJob(client.Rest, &job, companyName, url)
+				r.jobsDbClient.AddJob(job.JobTitle, company.Name)
+			}
 		}
 	}
 }

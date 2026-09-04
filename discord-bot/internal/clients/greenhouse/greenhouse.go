@@ -57,7 +57,16 @@ func (g GreenhouseClient) InitJobsCache(client *bot.Client) {
 		}
 
 		for _, job := range jobPostings.Jobs {
-			g.jobsDbClient.AddJob(job.JobTitle, companyName)
+			exists, err := g.jobsDbClient.JobAlreadyExists(job.JobTitle, company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if !exists {
+				g.notifyNewJob(client.Rest, &job, companyName, url)
+				g.jobsDbClient.AddJob(job.JobTitle, company.Name)
+			}
 		}
 	}
 }
