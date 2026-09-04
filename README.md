@@ -11,6 +11,7 @@ Just a discord bot for the PCEP server that notifies if a new job is found for t
 [Sphinx](https://job-boards.greenhouse.io/sphinxdefense?gh_src=30d1b1bd8us)  
 [General Legal](https://general.legal/careers)  
 [Cambia Health Solutions](https://cambiahealth.wd504.myworkdayjobs.com/en-US/External)  
+[Concora Credit](https://careers-concoracredit.icims.com/jobs/search)
 
 The bot uses the company's Workday API to fetch job listings, with a scheduled cron job running hourly on weekdays from 6 AM to 12 PM to look for any newly posted jobs. It also webscrapes for companies that don't use workday APIs (like Greenhouse for example).  
 

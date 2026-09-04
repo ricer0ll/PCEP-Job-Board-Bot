@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/greenhouse"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/icims"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/jobsdb"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/rippler"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/scheduler"
@@ -15,5 +16,6 @@ var (
 	workdayClient    *workday.WorkdayClient       = workday.NewWorkdayClient(restyClient, jobsDbClient)
 	greenhouseClient *greenhouse.GreenhouseClient = greenhouse.NewGreenhouseClient(restyClient, jobsDbClient)
 	ripplerClient    *rippler.RipplerClient       = rippler.NewRipplerClient(restyClient, jobsDbClient)
-	schedulerClient  *scheduler.SchedulerClient   = scheduler.NewSchedulerClient(workdayClient, greenhouseClient, ripplerClient)
+	icimsClient      *icims.IcimsClient           = icims.NewIcimsClient(restyClient, jobsDbClient)
+	schedulerClient  *scheduler.SchedulerClient   = scheduler.NewSchedulerClient(workdayClient, greenhouseClient, ripplerClient, icimsClient)
 )

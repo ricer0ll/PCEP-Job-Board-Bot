@@ -8,6 +8,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/greenhouse"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/icims"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/rippler"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/workday"
 )
@@ -26,12 +27,14 @@ func NewSchedulerClient(
 	workdayClient *workday.WorkdayClient,
 	greenhouseClient *greenhouse.GreenhouseClient,
 	ripplerClient *rippler.RipplerClient,
+	icimsClient *icims.IcimsClient,
 ) *SchedulerClient {
 	return &SchedulerClient{
 		targetClients: []jobClient{
 			workdayClient,
 			greenhouseClient,
 			ripplerClient,
+			icimsClient,
 		},
 	}
 }
