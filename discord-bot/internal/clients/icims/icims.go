@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	companyJsonPath string = filepath.Join("internal", "clients", "Icims", "companies.json")
+	companyJsonPath string = filepath.Join("internal", "clients", "icims", "companies.json")
 )
 
 const webscraperServiceUrl = "http://webscraper:8000/icims/jobs"
