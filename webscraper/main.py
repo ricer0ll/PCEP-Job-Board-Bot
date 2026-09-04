@@ -10,6 +10,11 @@ from models.rippler import (
     RipplerJobRequest,
     RipplerJobResponse
 )
+from models.icims import (
+    IcimJob,
+    IcimJobsRequest,
+    IcimJobsResponse
+)
 
 app = FastAPI()
 
@@ -79,7 +84,7 @@ async def get_rippling_jobs(request: RipplerJobRequest) -> RipplerJobResponse:
                 break
 
         if target_frame:
-            department_header = target_frame.locator("h3", has_text="Engineering")
+            department_header = target_frame.locator("h3", has_text="Engineering") # todo: refactor to not just use department headers
             department_section = department_header.locator("..")
             jobs: list[Locator] = await department_section.locator("> div").all()
 
@@ -101,3 +106,43 @@ async def get_rippling_jobs(request: RipplerJobRequest) -> RipplerJobResponse:
         await browser.close()
 
         return resp
+
+@app.post("/icims/jobs")
+async def get_icims_jobs(request: IcimJobsRequest):
+    async with async_playwright() as p:
+        browser = await p.firefox.launch(headless=True)
+        page = await browser.new_page()
+
+        await page.goto(request.url)
+        
+        await page.wait_for_timeout(3000)
+
+        resp = IcimJobsResponse(jobs=[])
+
+        target_frame = None
+        for frame in page.frames:
+            jobs_table_ispresent = await frame.locator("ul.iCIMS_JobsTable").count() > 0
+            if jobs_table_ispresent:
+                target_frame = frame
+                break
+
+        if target_frame:
+            jobs_table = frame.locator("ul.iCIMS_JobsTable")
+            jobs = await jobs_table.locator("li.iCIMS_JobCardItem").all()
+
+            for i, job in enumerate(jobs):
+                job_title = await job.locator("> div").locator("div.title").locator("a.iCIMS_Anchor").locator("h3").text_content()
+                location = await job.locator("> div").locator("div.left").locator("> span").nth(1).text_content()
+                # print(job_title)
+                print(location)
+
+                if any(keyword in job_title.lower() for keyword in keywords):
+                    resp.jobs.append(IcimJob(job_title=job_title.strip(), location=location.strip()))
+        else:
+            print("Error: Could not locate the job board iframe container.")
+
+        await browser.close()
+        
+        return resp
+            
+        
