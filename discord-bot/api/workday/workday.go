@@ -1,4 +1,4 @@
-package dto
+package workday
 
 type AppliedFacet struct {
 	JobFamily       []string `json:"jobFamily,omitempty"`

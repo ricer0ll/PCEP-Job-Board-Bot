@@ -3,6 +3,18 @@
         {
             "Name": "Jama Software",
             "URL": "https://www.jamasoftware.com/company/careers/"
+        },
+        {
+            "Name": "New Relic",
+            "URL": "https://job-boards.greenhouse.io/newrelic?offices%5B%5D=4014384008"
+        },
+        {
+            "Name": "Sphinx",
+            "URL": "https://job-boards.greenhouse.io/sphinxdefense?gh_src=30d1b1bd8us"
+        },
+        {
+            "Name": "General Legal",
+            "URL": "https://job-boards.greenhouse.io/generallegalllp"
         }
     ]
 }

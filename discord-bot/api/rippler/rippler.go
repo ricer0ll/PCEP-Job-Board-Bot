@@ -1,4 +1,4 @@
-package dto
+package rippler
 
 type RipplerJobPosting struct {
 	JobTitle string `json:"job_title"`

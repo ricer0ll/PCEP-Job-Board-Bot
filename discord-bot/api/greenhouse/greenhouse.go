@@ -1,4 +1,4 @@
-package dto
+package greenhouse
 
 type GreenhouseJobPosting struct {
 	JobTitle string `json:"job_title"`

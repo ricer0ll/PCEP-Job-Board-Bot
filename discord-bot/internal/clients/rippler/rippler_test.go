@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/rippler"
 )
 
 func TestGenerateNewJobPostingEmbedRippler(t *testing.T) {
@@ -12,7 +12,7 @@ func TestGenerateNewJobPostingEmbedRippler(t *testing.T) {
 
 	companyName := "Contoso LLC"
 	careersURL := "https://contoso.com"
-	jobPosting := &dto.RipplerJobPosting{
+	jobPosting := &rippler.RipplerJobPosting{
 		JobTitle: "Cloud Engineer",
 		Location: "Remote",
 	}

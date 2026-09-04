@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.nio.charset.StandardCharsets;
 
-@Configuration
+@Component
 public class Config {
     public static String getDbUser() {
         String user = System.getenv("POSTGRES_USER");
@@ -40,12 +40,5 @@ public class Config {
         } else {
             return "db:5432/postgres";
         }
-    }
-
-    public static String getJobId(String jobTitle, String companyName) {
-        return Hashing
-            .sha256()
-            .hashString(jobTitle + companyName, StandardCharsets.UTF_8)
-            .toString();
     }
 }

@@ -10,15 +10,15 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday/dto"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/api/workday"
+	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/clients/jobsdb"
 	"github.com/ricer0ll/pcep-job-board/discord-bot/internal/utils"
 	"resty.dev/v3"
 )
 
 var (
-	jobsCache       map[string][]dto.WorkdayJobPosting = make(map[string][]dto.WorkdayJobPosting)
-	companyJsonPath string                             = filepath.Join("internal", "clients", "workday", "companies.json")
-	relevantRoles   []string                           = []string{"developer", "engineer", "software", "architect", "cloud"}
+	companyJsonPath string   = filepath.Join("internal", "clients", "workday", "companies.json")
+	relevantRoles   []string = []string{"developer", "engineer", "software", "architect", "cloud"}
 )
 
 type DiscordRestClient interface {
@@ -26,24 +26,24 @@ type DiscordRestClient interface {
 }
 
 type WorkdayClient struct {
-	restyClient *resty.Client
+	restyClient  *resty.Client
+	jobsDbClient *jobsdb.JobsDbClient
 }
 
-func NewWorkdayClient(restyClient *resty.Client) *WorkdayClient {
+func NewWorkdayClient(restyClient *resty.Client, jobsDbClient *jobsdb.JobsDbClient) *WorkdayClient {
 	return &WorkdayClient{
-		restyClient: restyClient,
+		restyClient:  restyClient,
+		jobsDbClient: jobsDbClient,
 	}
 }
 
-func (w WorkdayClient) InitJobsCache() {
+func (w WorkdayClient) InitJobsCache(client *bot.Client) {
 	companies, err := loadCompanies(companyJsonPath)
 	if err != nil {
 		panic(err)
 	}
 
 	slog.Info(fmt.Sprintf("Loaded %d companies from Workday config", len(companies)))
-
-	jobsCache := make(map[string][]dto.WorkdayJobPosting)
 
 	for _, company := range companies {
 		jobs, err := w.getWorkdayJobPostings(
@@ -58,7 +58,18 @@ func (w WorkdayClient) InitJobsCache() {
 			continue
 		}
 
-		jobsCache[company.Name] = append(jobsCache[company.Name], jobs...)
+		for _, job := range jobs {
+			exists, err := w.jobsDbClient.JobAlreadyExists(w.getWorkdayJobId(&job), company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if !exists && w.isRelevantRole(job.Title) {
+				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
+				w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name) // workday is a lil different. we pass the JR instead.
+			}
+		}
 	}
 }
 
@@ -67,6 +78,8 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 	if err != nil {
 		panic("Unable to load companies")
 	}
+
+	slog.Info("Getting workday jobs")
 
 	for _, company := range companies {
 		// get workday job postings
@@ -82,17 +95,17 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 			continue
 		}
 
-		// add to id cache to check later (basically a set)
-		cachedIDs := make(map[string]struct{}) // Bullet Fields = ID (sorta)
-		for _, job := range jobsCache[company.Name] {
-			cachedIDs[job.BulletFields[0]] = struct{}{}
-		}
-
+		// check if job already exists. if not, add it to db and notify
 		for _, job := range liveJobs {
-			_, ok := cachedIDs[job.BulletFields[0]]
-			if !ok && w.isRelevantRole(job.Title) {
-				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL) // notify on discord if new job
-				jobsCache[company.Name] = append(jobsCache[company.Name], job)
+			exists, err := w.jobsDbClient.JobAlreadyExists(w.getWorkdayJobId(&job), company.Name)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+
+			if !exists && w.isRelevantRole(job.Title) {
+				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
+				w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name)
 			}
 		}
 	}
@@ -104,11 +117,11 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	jobFamilyGroup []string,
 	locationCountry []string,
 	locations []string,
-) ([]dto.WorkdayJobPosting, error) {
-	jobPostings := []dto.WorkdayJobPosting{}
+) ([]workday.WorkdayJobPosting, error) {
+	jobPostings := []workday.WorkdayJobPosting{}
 
-	request := dto.WorkdayJobPostingRequest{
-		AppliedFacets: dto.AppliedFacet{
+	request := workday.WorkdayJobPostingRequest{
+		AppliedFacets: workday.AppliedFacet{
 			JobFamily:       jobFamily,
 			JobFamilyGroup:  jobFamilyGroup,
 			LocationCountry: locationCountry,
@@ -116,7 +129,7 @@ func (w WorkdayClient) getWorkdayJobPostings(
 		},
 	}
 
-	resp := dto.WorkdayJobPostingResponse{}
+	resp := workday.WorkdayJobPostingResponse{}
 
 	result, err := w.restyClient.R().
 		SetContentType("application/json").
@@ -137,7 +150,7 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	return jobPostings, nil
 }
 
-func (w WorkdayClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) {
+func (w WorkdayClient) notifyNewJob(client DiscordRestClient, jobPosting *workday.WorkdayJobPosting, company string, workdayURL string) {
 	embed := w.generateNewJobPostingEmbed(jobPosting, company, workdayURL)
 	client.CreateMessage(
 		snowflake.MustParse(utils.GetDiscordChannelID()),
@@ -146,7 +159,7 @@ func (w WorkdayClient) notifyNewJob(client DiscordRestClient, jobPosting *dto.Wo
 
 }
 
-func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *dto.WorkdayJobPosting, company string, workdayURL string) discord.Embed {
+func (w WorkdayClient) generateNewJobPostingEmbed(jobPosting *workday.WorkdayJobPosting, company string, workdayURL string) discord.Embed {
 	var title string = fmt.Sprintf("New Job Posting from %s!", company)
 	var description string = fmt.Sprintf("Position: **%s**\nLocation: %s", jobPosting.Title, jobPosting.LocationsText)
 	var url string = workdayURL + fmt.Sprintf("%s", jobPosting.ExternalPath)
@@ -168,4 +181,13 @@ func (w WorkdayClient) isRelevantRole(role string) bool {
 		}
 	}
 	return false
+}
+
+// This either returns the bulletfields or the job title
+func (w WorkdayClient) getWorkdayJobId(job *workday.WorkdayJobPosting) string {
+	if len(job.BulletFields) == 0 {
+		return job.Title
+	}
+
+	return strings.Join(job.BulletFields, "")
 }
