@@ -65,7 +65,7 @@ func (w WorkdayClient) InitJobsCache(client *bot.Client) {
 				continue
 			}
 
-			if !exists {
+			if !exists && w.isRelevantRole(job.Title) {
 				w.notifyNewJob(client.Rest, &job, company.Name, company.WorkdayBaseURL)
 				w.jobsDbClient.AddJob(w.getWorkdayJobId(&job), company.Name) // workday is a lil different. we pass the JR instead.
 			}
