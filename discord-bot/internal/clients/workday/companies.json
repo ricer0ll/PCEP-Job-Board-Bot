@@ -1,6 +1,19 @@
 {
     "companies": [
         {
+            "Name": "Intel Corporation",
+            "WorkdayBaseURL": "https://intel.wd1.myworkdayjobs.com/en-US/External",
+            "WorkdayRequestURL": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs",
+            "JobFamilyGroup": [
+                "dc8bf79476611087d67b36517cf17036",
+                "ace7a3d23b7e01a0544279031a0ec85c",
+                "dc8bf79476611087d67b2cccdde47034"
+            ],
+            "JobFamily": [],
+            "LocationCountry": [],
+            "Locations": ["1e4a4eb3adf1011246675c76bf81f8ce"]
+        },
+        {
             "Name": "Cambia Health Solutions",
             "WorkdayBaseURL": "https://cambiahealth.wd504.myworkdayjobs.com/en-US/External",
             "WorkdayRequestURL": "https://cambiahealth.wd504.myworkdayjobs.com/wday/cxs/cambiahealth/External/jobs",
