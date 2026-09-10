@@ -1,7 +1,7 @@
 {
     "companies": [
         {
-            "Name": "HP Incorporated",
+            "Name": "HP Inc.",
             "WorkdayBaseURL": "https://hp.wd5.myworkdayjobs.com/en-US/ExternalCareerSite",
             "WorkdayRequestURL": "https://hp.wd5.myworkdayjobs.com/wday/cxs/hp/ExternalCareerSite/jobs",
             "JobFamilyGroup": [
