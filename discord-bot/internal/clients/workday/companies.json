@@ -1,6 +1,25 @@
 {
     "companies": [
         {
+            "Name": "HP Inc.",
+            "WorkdayBaseURL": "https://hp.wd5.myworkdayjobs.com/en-US/ExternalCareerSite",
+            "WorkdayRequestURL": "https://hp.wd5.myworkdayjobs.com/wday/cxs/hp/ExternalCareerSite/jobs",
+            "JobFamilyGroup": [
+                "80667f5f2da3010ee8417a74cf4b0000",
+                "98cbd30d374e10333e00271ec8445e81",
+                "98cbd30d374e10333e000e782ca45e69",
+                "98cbd30d374e10333dfffe8ff45c5e5b"
+            ],
+            "JobFamily": [],
+            "LocationCountry": [],
+            "Locations": [],
+            "Location_Country": ["bc33aa3152ec42d4995f4791a106ed09"],
+            "Location_Region_State_Province": [
+                "de9b48948ef8421db97ddf4ea206e931",
+                "6fcc4198762c4a7c807486c849fe94dd"
+            ]
+        },
+        {
             "Name": "Intel Corporation",
             "WorkdayBaseURL": "https://intel.wd1.myworkdayjobs.com/en-US/External",
             "WorkdayRequestURL": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs",
@@ -11,7 +30,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": ["1e4a4eb3adf1011246675c76bf81f8ce"]
+            "Locations": ["1e4a4eb3adf1011246675c76bf81f8ce"],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "Cambia Health Solutions",
@@ -20,7 +41,9 @@
             "JobFamilyGroup": [],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "CDK Global",
@@ -31,7 +54,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "The Standard",
@@ -42,7 +67,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "Apex Fintech Solutions",
@@ -53,7 +80,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "Trimble",
@@ -73,7 +102,9 @@
             "Locations": [
                 "baf3c1ba86ad010bb11ef67d1701fc4a",
                 "7d68730cb13c42d0b43d6246e83eff90"
-            ]
+            ],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         }
     ]
 }

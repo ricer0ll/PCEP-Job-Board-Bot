@@ -1,10 +1,12 @@
 package workday
 
 type AppliedFacet struct {
-	JobFamily       []string `json:"jobFamily,omitempty"`
-	JobFamilyGroup  []string `json:"jobFamilyGroup,omitempty"`
-	Locations       []string `json:"locations,omitempty"`
-	LocationCountry []string `json:"locationCountry,omitempty"`
+	JobFamily                      []string `json:"jobFamily,omitempty"`
+	JobFamilyGroup                 []string `json:"jobFamilyGroup,omitempty"`
+	Locations                      []string `json:"locations,omitempty"`
+	LocationCountry                []string `json:"locationCountry,omitempty"`
+	Location_Country               []string `json:"Location_Country,omitempty"`
+	Location_Region_State_Province []string `json:"Location_Region_State_Province,omitempty"`
 }
 
 type WorkdayJobPosting struct {

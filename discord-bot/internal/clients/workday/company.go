@@ -7,13 +7,15 @@ import (
 )
 
 type Company struct {
-	Name              string
-	WorkdayBaseURL    string
-	WorkdayRequestURL string
-	JobFamily         []string
-	JobFamilyGroup    []string
-	Locations         []string
-	LocationCountry   []string
+	Name                           string
+	WorkdayBaseURL                 string
+	WorkdayRequestURL              string
+	JobFamily                      []string
+	JobFamilyGroup                 []string
+	Locations                      []string
+	LocationCountry                []string
+	Location_Country               []string
+	Location_Region_State_Province []string
 }
 
 type Config struct {

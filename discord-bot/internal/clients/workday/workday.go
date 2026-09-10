@@ -51,6 +51,8 @@ func (w WorkdayClient) InitJobsCache(client *bot.Client) {
 			company.JobFamily,
 			company.JobFamilyGroup,
 			company.LocationCountry,
+			company.Location_Country,
+			company.Location_Region_State_Province,
 			company.Locations,
 		)
 		if err != nil {
@@ -88,6 +90,8 @@ func (w WorkdayClient) GetNewJobPostings(client *bot.Client) {
 			company.JobFamily,
 			company.JobFamilyGroup,
 			company.LocationCountry,
+			company.Location_Country,
+			company.Location_Region_State_Province,
 			company.Locations,
 		)
 		if err != nil {
@@ -116,16 +120,20 @@ func (w WorkdayClient) getWorkdayJobPostings(
 	jobFamily []string,
 	jobFamilyGroup []string,
 	locationCountry []string,
+	Location_Country []string,
+	Location_Region_State_Province []string,
 	locations []string,
 ) ([]workday.WorkdayJobPosting, error) {
 	jobPostings := []workday.WorkdayJobPosting{}
 
 	request := workday.WorkdayJobPostingRequest{
 		AppliedFacets: workday.AppliedFacet{
-			JobFamily:       jobFamily,
-			JobFamilyGroup:  jobFamilyGroup,
-			LocationCountry: locationCountry,
-			Locations:       locations,
+			JobFamily:                      jobFamily,
+			JobFamilyGroup:                 jobFamilyGroup,
+			LocationCountry:                locationCountry,
+			Location_Country:               Location_Country,
+			Location_Region_State_Province: Location_Region_State_Province,
+			Locations:                      locations,
 		},
 	}
 
