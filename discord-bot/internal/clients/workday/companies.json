@@ -11,7 +11,12 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": ["1e4a4eb3adf1011246675c76bf81f8ce"]
+            "Locations": ["1e4a4eb3adf1011246675c76bf81f8ce"],
+            "Location_Country": ["bc33aa3152ec42d4995f4791a106ed09"],
+            "Location_Region_State_Province": [
+                "de9b48948ef8421db97ddf4ea206e931",
+                "6fcc4198762c4a7c807486c849fe94dd"
+            ]
         },
         {
             "Name": "Cambia Health Solutions",
@@ -20,7 +25,9 @@
             "JobFamilyGroup": [],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "CDK Global",
@@ -31,7 +38,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "The Standard",
@@ -42,7 +51,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "Apex Fintech Solutions",
@@ -53,7 +64,9 @@
             ],
             "JobFamily": [],
             "LocationCountry": [],
-            "Locations": []
+            "Locations": [],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         },
         {
             "Name": "Trimble",
@@ -73,7 +86,9 @@
             "Locations": [
                 "baf3c1ba86ad010bb11ef67d1701fc4a",
                 "7d68730cb13c42d0b43d6246e83eff90"
-            ]
+            ],
+            "Location_Country": [],
+            "Location_Region_State_Province": []
         }
     ]
 }
