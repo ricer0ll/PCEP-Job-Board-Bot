@@ -18,6 +18,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./jobs-db-service
 
     steps:
     - uses: actions/checkout@v4
@@ -28,4 +31,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Run Java Unit Tests
-      run: mvn test -Dtest='HasherUtilTest,*ServiceImplTest,*ControllerTest'
+      run: mvn test
