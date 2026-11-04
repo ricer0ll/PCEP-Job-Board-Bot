@@ -71,19 +71,6 @@
             "Location_Region_State_Province": []
         },
         {
-            "Name": "Apex Fintech Solutions",
-            "WorkdayBaseURL": "https://peak6group.wd1.myworkdayjobs.com/apexfintechsolutions",
-            "WorkdayRequestURL": "https://peak6group.wd1.myworkdayjobs.com/wday/cxs/peak6group/apexfintechsolutions/jobs",
-            "JobFamilyGroup": [
-                "9319b7dfa5ee10212c5612fee7de0000"
-            ],
-            "JobFamily": [],
-            "LocationCountry": [],
-            "Locations": [],
-            "Location_Country": [],
-            "Location_Region_State_Province": []
-        },
-        {
             "Name": "Trimble",
             "WorkdayBaseURL": "https://trimble.wd1.myworkdayjobs.com/en-US/TrimbleCareers",
             "WorkdayRequestURL": "https://trimble.wd1.myworkdayjobs.com/wday/cxs/trimble/TrimbleCareers/jobs",
