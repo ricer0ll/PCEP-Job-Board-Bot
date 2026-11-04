@@ -2,7 +2,6 @@
 
 Just a discord bot for the PCEP server that notifies if a new job is found for the following companies:  
 [The Standard](https://standard.wd1.myworkdayjobs.com/Search)  
-[Apex Fintech Solutions](https://peak6group.wd1.myworkdayjobs.com/apexfintechsolutions)  
 [Trimble](https://trimble.wd1.myworkdayjobs.com/en-US/TrimbleCareers/jobs)  
 [Jama Software](https://www.jamasoftware.com/company/careers/#careers)  
 [LegitScript](https://www.legitscript.com/about/careers/)  
